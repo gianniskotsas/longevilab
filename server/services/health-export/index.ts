@@ -110,12 +110,14 @@ async function extractHealthExportXml(
     createReadStream(zipPath)
       .pipe(unzipper.Parse())
       .on("entry", async (entry) => {
-        const fileName = entry.path;
+        const fileName = entry.path.normalize("NFC");
 
-        // Look for export.xml or Export.xml in any directory
+        // Look for export.xml, Export.xml, or exportación.xml in any directory
         if (
           fileName.endsWith("export.xml") ||
-          fileName.endsWith("Export.xml")
+          fileName.endsWith("Export.xml") ||
+          fileName.endsWith("exportación.xml") ||
+          fileName.endsWith("Exportación.xml")
         ) {
           const targetPath = join(extractDir, "export.xml");
           xmlPath = targetPath;
@@ -462,8 +464,8 @@ export async function processHealthExport(
     // Deduplicate records within the import
     const dedupedRecords = deduplicateRecords(records);
 
-    // Phase 3: Filter duplicates against existing data
-    const existingKeys = await getExistingEntryKeys(userId);
+    // Phase 3: Filter duplicates against existing data (scoped to household member)
+    const existingKeys = await getExistingEntryKeys(userId, householdMemberId);
 
     const { recordsToImport, skippedCount, skippedByType } = filterDuplicates(
       dedupedRecords,

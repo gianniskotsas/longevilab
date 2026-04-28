@@ -100,7 +100,8 @@ export async function processLlmExtractionJob(data: LlmExtractionJobData): Promi
       await db.insert(bloodTestResults).values(resultsToInsert);
     }
 
-    // Update blood test with extracted metadata and set status to review
+    // Update blood test with extracted metadata and set status to review (not completed)
+    // "completed" means user-confirmed; "review" means extraction done, awaiting user verification
     await db
       .update(bloodTests)
       .set({

@@ -11,7 +11,7 @@ services:
     container_name: longevilab-postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-bloodwork}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bloodwork}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
       POSTGRES_DB: ${POSTGRES_DB:-bloodwork}
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -43,7 +43,7 @@ services:
     image: ghcr.io/gianniskotsas/longevilab-worker:latest
     container_name: longevilab-migrate
     environment:
-      DATABASE_URL: postgres://${POSTGRES_USER:-bloodwork}:${POSTGRES_PASSWORD:-bloodwork}@postgres:5432/${POSTGRES_DB:-bloodwork}
+      DATABASE_URL: postgres://${POSTGRES_USER:-bloodwork}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@postgres:5432/${POSTGRES_DB:-bloodwork}
     depends_on:
       postgres:
         condition: service_healthy
@@ -54,7 +54,7 @@ services:
     image: ghcr.io/gianniskotsas/longevilab-worker:latest
     container_name: longevilab-seed
     environment:
-      DATABASE_URL: postgres://${POSTGRES_USER:-bloodwork}:${POSTGRES_PASSWORD:-bloodwork}@postgres:5432/${POSTGRES_DB:-bloodwork}
+      DATABASE_URL: postgres://${POSTGRES_USER:-bloodwork}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@postgres:5432/${POSTGRES_DB:-bloodwork}
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -66,7 +66,7 @@ services:
     container_name: longevilab-app
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgres://${POSTGRES_USER:-bloodwork}:${POSTGRES_PASSWORD:-bloodwork}@postgres:5432/${POSTGRES_DB:-bloodwork}
+      DATABASE_URL: postgres://${POSTGRES_USER:-bloodwork}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@postgres:5432/${POSTGRES_DB:-bloodwork}
       REDIS_URL: redis://redis:6379
       BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3000}
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET is required}
@@ -95,10 +95,15 @@ services:
     container_name: longevilab-worker
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgres://${POSTGRES_USER:-bloodwork}:${POSTGRES_PASSWORD:-bloodwork}@postgres:5432/${POSTGRES_DB:-bloodwork}
+      DATABASE_URL: postgres://${POSTGRES_USER:-bloodwork}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@postgres:5432/${POSTGRES_DB:-bloodwork}
       REDIS_URL: redis://redis:6379
+      LLM_PROVIDER: ${LLM_PROVIDER:-none}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-}
       DATALAB_API_KEY: ${DATALAB_API_KEY:-}
+      TESSERACT_LANGS: ${TESSERACT_LANGS:-eng+spa}
       OCR_WORKER_CONCURRENCY: ${OCR_WORKER_CONCURRENCY:-5}
       LLM_WORKER_CONCURRENCY: ${LLM_WORKER_CONCURRENCY:-3}
       HEALTH_EXPORT_WORKER_CONCURRENCY: ${HEALTH_EXPORT_WORKER_CONCURRENCY:-1}
